@@ -161,7 +161,7 @@ def makeAdjacency(leaves):
 
 def dfs_neighs_leaf_extend(neighs, node, pos):
     # This function expands the neighbor information for a node to include all its neighbors that are leaves
-    if node and node.isLeaf: 
+    if (type(node) == type(None)) or node.isLeaf: 
         neighs.add(node)
         return
 

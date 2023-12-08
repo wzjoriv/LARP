@@ -19,8 +19,8 @@ class Node:
         self.val = val
         self.isLeaf = isLeaf
         self.tL = tL
-        self.tR = tR
-        self.bL = bL
+        self.tR = tR # remove this
+        self.bL = bL # remove this
         self.bR = bR
         # add center location for routing purposes
         # self.depth = depth
@@ -34,15 +34,22 @@ class QuadTree:
     def construct(self, grid):
 
         def dfs(n, r, c): # n = size of grid; r = row number of topleft of grid; c = column of topLeft of grid;
-            allSame = True
+            sameWindow = True
+            minSize = 2
             # TODO: Detect values within range (Comment for Pruthvi)
+            bufferSize = 0.1
+            maxVal = grid[r][c]
+            min = maxVal//bufferSize * bufferSize
+            max = min + bufferSize
             for i in range(n):
                 for j in range(n):
-                    if grid[r][c] != grid[r+i][c+j]:
-                        allSame = False
+                    if (n>=minSize) and (grid[r+i][c+j] < min or grid[r+i][c+j] > max):
+                        sameWindow = False
                         break
-            if allSame:
-                return Node(grid[r][c], True, (r,c), (r,c+n-1), (c,r+n-1), (c+n-1,r+n-1)) # coordinates given as (x,y)
+                    if grid[r+i][c+j] > maxVal:
+                        maxVal = grid[r+i][c+j]
+            if sameWindow:
+                return Node(maxVal, True, (r,c), (r,c+n-1), (c,r+n-1), (c+n-1,r+n-1))
             n = n // 2
             tL = dfs(n, r, c)
             tR = dfs(n, r, c+n)
@@ -131,13 +138,6 @@ def populate_neighs(root):
     populate_neighs(root.tR)
     populate_neighs(root.bL)
     populate_neighs(root.bR)
-    """
-    - Currently, this is nearly complete. We just need to add post-processing to simplify
-      all leaves that hold other nodes as their neighbors rather than other leaves. 
-    - We should first make a list of all the leaves.
-    - Then, going through all these leaves, we can check all their neighrbos and if those 
-      neighors are not leaves, we must process then accordingly to find the leaves on the correct side.
-    """
 
 def findLeaves(node):
     leaves = []

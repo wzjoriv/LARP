@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+import numpy as np
+import math
+import matplotlib.pyplot as plt
 
 """
 Authors: pruth, Josue N Rivera
 """
     
 class Node:
-
     """ childn_idx = {
         "tl": 0 # Top Left
     } 
@@ -14,7 +16,6 @@ class Node:
      "top": 1
     }
     """
-
     def __init__(self, val, isLeaf, tL, tR, bL, bR):
         self.val = val
         self.isLeaf = isLeaf
@@ -37,7 +38,7 @@ class QuadTree:
             sameWindow = True
             minSize = 2
             # TODO: Detect values within range (Comment for Pruthvi)
-            bufferSize = 0.1
+            bufferSize = .25
             maxVal = grid[r][c]
             min = maxVal//bufferSize * bufferSize
             max = min + bufferSize
@@ -59,7 +60,6 @@ class QuadTree:
             return Node(0, False, tL, tR, bL, bR)
         return dfs(len(grid), 0, 0)
         
-    
 
 def displayQuadTree(quadTree):
     def getOutputBFS(node): # displays the quadtree in a breadth-first manner
@@ -179,6 +179,37 @@ def dfs_neighs_leaf_extend(neighs, node, pos):
     for next_node in directions[pos]:
         dfs_neighs_leaf_extend(neighs, next_node, pos)
 
+def generate_potential_field(size):
+    np.random.seed(27)
+    graph = np.zeros((size, size))
+    points = []
+    """
+    for i in range(5): #int(size/2)
+        points.append((np.random.randint(1,size-1),np.random.randint(1,size-1)))
+    """
+    points = [(size//4,size//4), (size*3//4,size//4), (size//4,size*3//4), (size*3//4,size*3//4)]
+    for point in points:
+        midRow = point[0]
+        midCol = point[1]
+        disperse = size//4
+        height = 1
+        for row in range(size):
+            for col in range(size):
+                if abs(row-midRow) > disperse or abs(col-midCol) > disperse:
+                    graph[row][col] += 0
+                else:
+                    graph[row][col] += height * (math.exp(-((row-midRow)/disperse)**2)) * (math.exp(-((col-midCol)/disperse)**2))
+    return(graph)
+
+def outputPF(graph):
+    plt.figure(figsize=(8, 6))
+    plt.imshow(graph, cmap='hot', interpolation='nearest')  # 'hot' colormap for emphasis
+    plt.colorbar()  # Show color scale
+    plt.title('Heatmap of the Artificial Potential Field')
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
+    plt.show()
+
 if __name__ == "__main__":
     grid2 =[[1,1,1,1,0,0,0,0],
             [1,1,1,1,0,0,0,0],
@@ -188,7 +219,8 @@ if __name__ == "__main__":
             [1,1,1,1,0,0,0,0],
             [1,1,1,1,0,0,0,0],
             [1,1,1,1,0,0,0,0]]
-    root = generateQuadTree(grid2)
+    apf = generate_potential_field(100)
+    root = generateQuadTree(apf)
     populate_neighs(root)
     leaves = findLeaves(root)
     makeAdjacency(leaves)
@@ -197,6 +229,9 @@ if __name__ == "__main__":
         print(z.tL)
     """
     print("Hello, World!")
+    print(len(leaves))
+    outputPF(apf)
+
 
 
 """
